@@ -20,13 +20,14 @@ def classify_single(input):
         input = tuplify_input_image(input)
     
     if(input.shape[1] != 28 or input.shape[2] != 28):
+        print(input.shape)
         print("Invalid Image Size. Resize image to 28x28")
         return
 
     y = MNIST_model.predict(input, verbose=2)[0]
-    print("Prediction array: ",y)
+    #print("Prediction array: ",y)
     y = int(np.where(y == np.amax(y))[0])
-    print("The number is", y)
+    #print("The number is", y)
     return y
 
 #Our model requires a tuple so convert input image to tuple if not already
@@ -35,14 +36,14 @@ def tuplify_input_image(img):
         prep_img = np.array([img])
         return prep_img
 
-
-img = cv.imread('seven.png', cv.IMREAD_GRAYSCALE)
-img = img/255.0
-th,img = cv.threshold(img, 0.5, 1, cv.THRESH_BINARY_INV)
-img = cv.resize(img,(20,20),interpolation=cv.INTER_LINEAR)
-img = cv.copyMakeBorder(img, 4,4,4,4, cv.BORDER_CONSTANT, None, [0,0,0])
+# TODO: Turn this image processing into a function -> likely in another file
+#img = cv.imread('seven.png', cv.IMREAD_GRAYSCALE)
+#img = img/255.0
+#th,img = cv.threshold(img, 0.5, 1, cv.THRESH_BINARY_INV)
+#img = cv.resize(img,(20,20),interpolation=cv.INTER_LINEAR)
+#img = cv.copyMakeBorder(img, 4,4,4,4, cv.BORDER_CONSTANT, None, [0,0,0])
 #img = x_test[8:9]
 #img = img[0]
-implot = plt.imshow(img, cmap="gray")
-plt.show()
-classify_single(img)
+#implot = plt.imshow(img, cmap="gray")
+#plt.show()
+#classify_single(img)
