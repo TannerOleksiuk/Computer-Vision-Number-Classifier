@@ -6,7 +6,7 @@ import MNIST_Classify as mnist
 cap = cv.VideoCapture(0)
 
 # Set delay to 1ms
-delay = 1
+delay = 0
 
 # Keycodes
 ESCAPE_KEY = 27
@@ -85,45 +85,46 @@ def classify_image(image):
 
 # Loop to capture frames
 while True:
+    # Read frame
     ret, frame = cap.read()
+
     # Resize frame
     frame = cv.resize(frame, None, fx=0.5, fy=0.5, interpolation=cv.INTER_LINEAR)
     frame_processed, contours = processFrame(frame)
-    # Copy clean frame that has no drawings on it
+    # Copy clean frame that has no drawings on it in grayscale
     frame_cpy = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
     images_to_classify = []
     centers_of_images = []
+
     # Draw graphics
     #cv.drawContours(frame, contours, -1, (0,255,0), 1) # For troubleshooting
     centers = get_contour_center(contours)
-    # Draw dots at center of mass of contours
-    if len(centers) > 1:
-        for center in centers:
-            # Get center x and y
-            c_x = center[0]
-            c_y = center[1]
-            # Draw centers and borders
-            frame = cv.circle(frame, center, 1, (0, 0, 255), 2)
-            frame = cv.rectangle(frame, (c_x+40, c_y+40), (c_x-40,c_y-40), (255,0,0), 1)
 
+    # Ensure arrays are cleared
     images_to_classify.clear()
     centers_of_images.clear()
+
     for center in centers:
         # Get center x and y
         c_x = center[0]
-        c_y = center[1]      
+        c_y = center[1]
+
+        # Draw centers and borders
+        #frame = cv.circle(frame, center, 1, (0, 0, 255), 2)
+        frame = cv.rectangle(frame, (c_x+40, c_y+40), (c_x-40,c_y-40), (0,255,0), 1)
+
         # Grab regions of interest from frame
         roi = frame_cpy[(c_y-40):(c_y+40), (c_x-40):(c_x+40)]
         if roi.size > 0:
             images_to_classify.append(roi)
             centers_of_images.append([c_x, c_y])
     
-
+    # Classify and display the predicted number of all ROI's
     for indx, image in enumerate(images_to_classify):
-        number = classify_image(image)
+        number, prob = classify_image(image)
         x = centers_of_images[indx][0]
         y = centers_of_images[indx][1]
-        cv.putText(frame, f'{number}', (x,y-50), cv.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 1, cv.LINE_AA)
+        cv.putText(frame, f'Num: {number} Prob: {prob:.4f}', (x-40,y-50), cv.FONT_HERSHEY_PLAIN, 1, (255, 255, 0), 1, cv.LINE_AA)
         #print(number)
 
     # Show frame

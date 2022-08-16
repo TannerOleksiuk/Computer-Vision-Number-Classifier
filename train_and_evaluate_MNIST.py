@@ -36,10 +36,6 @@ model.fit(x_train,y_train,epochs=5)
 
 model.evaluate(x_test,y_test,verbose=2)
 
-#Return probabillities
-probability_model = tf.keras.Sequential([model, tf.keras.layers.Softmax()])
-
-probability_model(x_test[:5])
 
 #Save model for use later
 model.save('MNIST_Seq_model.h5')

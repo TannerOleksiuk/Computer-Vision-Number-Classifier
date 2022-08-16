@@ -13,6 +13,8 @@ mnist = tf.keras.datasets.mnist
 x_train, x_test = x_train/255.0, x_test / 255.0
 
 MNIST_model = tf.keras.models.load_model("MNIST_Seq_model.h5")
+# Generate probabillity model
+probability_model = tf.keras.Sequential([MNIST_model, tf.keras.layers.Softmax()])
 
 #classify a single input
 def classify_single(input):
@@ -24,11 +26,19 @@ def classify_single(input):
         print("Invalid Image Size. Resize image to 28x28")
         return
 
-    y = MNIST_model.predict(input, verbose=2)[0]
+    #y = MNIST_model.predict(input, verbose=2)[0]
+    #y_prob = Prob_model.predict(input)[0]
     #print("Prediction array: ",y)
-    y = int(np.where(y == np.amax(y))[0])
-    #print("The number is", y)
-    return y
+    y_prob = probability_model(input)[0]
+    y = int(np.where(y_prob == np.amax(y_prob))[0])
+    # Grab probabillity of that number
+    y_prob = y_prob[y]
+    y_prob = y_prob.numpy()
+
+    #y = int(np.where(y == np.amax(y))[0]) # Not needed now that using prob model
+    #y_prob = int(np.where(y == np.amax(y))[0])
+    #print("The number is", y, y_prob)
+    return y, y_prob
 
 #Our model requires a tuple so convert input image to tuple if not already
 def tuplify_input_image(img):
