@@ -15,7 +15,7 @@ D_KEY = 100
 W_KEY = 119
 S_KEY = 115
 
-#Thresholding values
+# Thresholding values
 min_thresh = 100
 max_thresh = 200
 
@@ -30,7 +30,13 @@ nearest_point_thres = 150
 if not cap.isOpened():
     raise IOError("Unable to open webcam")
 
-# Processing that is done on frame
+
+"""
+Process frame for contour detection. Converts to grayscale, thresholds, and applies Canny Edge Detection.
+Contours are then found and there locations returned.
+Input: Frame to be processed.
+Output: Processed Frame, Found Contours
+"""
 def processFrame(frame):
     frame_processed = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
     frame_processed = cv.Canny(frame_processed, min_thresh, max_thresh)
@@ -40,7 +46,11 @@ def processFrame(frame):
     cv.putText(frame_processed, f'min: {min_thresh}, max: {max_thresh}', (10,20), cv.FONT_HERSHEY_PLAIN, 1, (255, 255, 255), 1, cv.LINE_AA)
     return frame_processed, contours
 
-# Get average of points to find centers of contours
+"""
+Finds the geometric center of the contour by averaging x and y points.
+Input: Array of contours.
+Output: Array of contour centers in same order of input array.
+"""
 def get_contour_center(contours):
     centers = []
     for contour in contours:
@@ -68,7 +78,12 @@ def get_contour_center(contours):
 
     return centers
 
-# Process images for classification
+"""
+Processes an image to match that of the MNIST dataset.
+Normalizes image, inverse thresholds image, resizes, and pads 4px on each side.
+Input: Image for processing.
+Output: Processed Image.
+"""
 def process_image(img):
     img = img/255.0
     th,img = cv.threshold(img, 0.5, 1, cv.THRESH_BINARY_INV)
@@ -76,12 +91,16 @@ def process_image(img):
     img = cv.copyMakeBorder(img, 4,4,4,4, cv.BORDER_CONSTANT, None, [0,0,0])
     return img
 
-# Classify images using tensorflow model
+"""
+Classify an image using the MNIST trained keras model.
+Input: Image to classify.
+Output: Predicted number.
+"""
 def classify_image(image):
     image = process_image(image)
-    num = mnist.classify_single(image)
+    num, prob = mnist.classify_single(image)
     #cv.imshow(f"Classified: {num}", image) # For troubleshooting
-    return num
+    return num, prob
 
 # Loop to capture frames
 while True:
@@ -145,5 +164,6 @@ while True:
     if key == S_KEY:
         max_thresh -= 1
 
+# Release capture and destory windows
 cap.release()
 cv.destroyAllWindows()
